@@ -3,17 +3,21 @@ package crypticthread.smsapp;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
-import android.widget.TextView;
 
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
@@ -22,18 +26,23 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private TextInputEditText et_emailID;
     private TextInputEditText et_password;
     private Button btn_login;
-    private TextView tv_forgot;
+    private Button btn_forgot;
     private ScrollView sv_login_holder;
     private ImageView img_logo;
     private JsonApi loginAsync;
+    private RelativeLayout loading_view;
     private JsonApi.JsonApiListener listener = new JsonApi.JsonApiListener() {
         @Override
         public void onSuccess(String method, String response) {
-
+            showLoading(false);
+            Log.i(TAG, "onSuccess:response "+response);
+            startActivity(new Intent(LoginActivity.this,SelectChildrensActivity.class));
         }
 
         @Override
         public void onError(String error) {
+            showLoading(false);
+            showDialog(error);
 
         }
     };
@@ -48,11 +57,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         et_emailID = (TextInputEditText) findViewById(R.id.et_emailId);
         et_password = (TextInputEditText) findViewById(R.id.et_password);
         btn_login = (Button) findViewById(R.id.btn_login);
-        tv_forgot = (TextView) findViewById(R.id.tv_forgot);
+        btn_forgot = (Button) findViewById(R.id.btn_forgot);
         sv_login_holder = (ScrollView) findViewById(R.id.sv_login_holder);
         img_logo = (ImageView) findViewById(R.id.app_icon);
+        loading_view = (RelativeLayout) findViewById(R.id.loadingView);
         et_emailID.clearFocus();
         et_password.clearFocus();
+
+        et_emailID.setText("hitesh@gmail.com");
+        et_password.setText("123");
 
         //for animation
         sv_login_holder.setVisibility(View.INVISIBLE);
@@ -68,8 +81,23 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void showDialog(String msg) {
-        new AlertDialog.Builder(LoginActivity.this).setTitle("Invalid Entry").setMessage(msg)
+        new AlertDialog.Builder(LoginActivity.this).setTitle("Sorry").setMessage(msg)
                 .setPositiveButton("Retry", null).create().show();
+    }
+
+
+    private void showLoading(Boolean isShow){
+
+        loading_view.setVisibility(isShow?View.VISIBLE:View.INVISIBLE);
+        et_emailID.clearFocus();
+        et_password.clearFocus();
+        et_emailID.setEnabled(!isShow);
+        et_password.setEnabled(!isShow);
+        btn_login.setText(isShow?"Logging in...":"Login");
+        btn_forgot.setVisibility(!isShow?View.VISIBLE:View.GONE);
+        btn_login.setEnabled(!isShow);
+        btn_forgot.setEnabled(!isShow);
+
     }
 
     private void animateLogin(ImageView logo, final ScrollView sv_login_holder) {
@@ -116,10 +144,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     public void onClick(View v) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(v.getWindowToken(),0);
         if (v.equals(btn_login)) {
             if (getText(et_emailID).matches("[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+") && getText(et_emailID).length() > 0) {
-                //loginAsync = new JsonApi()
-
+                showLoading(true);
+                loginAsync = new JsonApi("http://www.crypticthread.com.np/smsapi/parents.php?code=ABCD_1124&email="+getText(et_emailID)+"&password="+getText(et_password),listener);
+                loginAsync.execute();
             } else if (getText(et_password).isEmpty()) {
                 showDialog("Password is empty");
             } else {

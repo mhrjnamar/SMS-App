@@ -22,6 +22,7 @@ public class JsonApi extends AsyncTask<String,Void,String> {
     private String result = null;
     private String method;
     private JsonApiListener listener;
+    private String error = null;
 
     public JsonApi(String method,JsonApiListener listener) {
         this.method = method;
@@ -31,10 +32,16 @@ public class JsonApi extends AsyncTask<String,Void,String> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+
     }
 
     @Override
     protected String doInBackground(String... params) {
+        try {
+            Thread.sleep(600);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         HttpClient client = new DefaultHttpClient();
         HttpConnectionParams.setConnectionTimeout(client.getParams(),10000);
         HttpPost post = new HttpPost(method);
@@ -52,7 +59,7 @@ public class JsonApi extends AsyncTask<String,Void,String> {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            result = e.toString();
+            error = e.toString();
         }
 
         return result;
@@ -62,8 +69,8 @@ public class JsonApi extends AsyncTask<String,Void,String> {
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
 
-        if (s.isEmpty()){
-            listener.onError("Could not connect to the Server");
+        if (s==null){
+            listener.onError("Could not connect to the Server. \nPlease Check your Internet Connection and try again.\n\nDetails:\n"+error);
         }else {
             listener.onSuccess(method,s);
         }
