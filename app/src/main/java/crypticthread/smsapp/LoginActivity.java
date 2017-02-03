@@ -46,6 +46,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private JsonApi.JsonApiListener listener = new JsonApi.JsonApiListener() {
         @Override
         public void onSuccess(String method, String response) {
+            loginAsync = null;
 
             try {
                 JSONObject object = new JSONObject(response);
@@ -189,8 +190,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 frag = LoadingFrag.newInstance("Logging in please wait...");
                 frag.show(getSupportFragmentManager(), "Loading");
                 showLoading(true);
-                loginAsync = new JsonApi("http://www.crypticthread.com.np/smsapi/parents.php?code=ABCD_1124&email=" + getText(et_emailID) + "&password=" + getText(et_password), listener);
-                loginAsync.execute();
+                if (loginAsync == null) {
+                    loginAsync = new JsonApi("http://www.crypticthread.com.np/smsapi/parents.php?code=ABCD_1124&email=" + getText(et_emailID) + "&password=" + getText(et_password), listener);
+                    loginAsync.execute();
+                }
             } else if (getText(et_password).isEmpty()) {
                 showDialog("Password is empty");
             } else {

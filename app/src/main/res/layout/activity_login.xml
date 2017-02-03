@@ -69,16 +69,18 @@
             <Button
                 android:id="@+id/btn_login"
                 style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:textAllCaps="false"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/activity_horizontal_margin"
+                android:layout_gravity="center"
                 android:text="@string/login" />
 
             <Button
                 android:id="@+id/btn_forgot"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:gravity="center"
                 android:textAllCaps="false"

@@ -19,6 +19,11 @@
             </intent-filter>
         </activity>
         <activity android:name=".SelectChildrensActivity"></activity>
+        
+        <provider
+            android:authorities="crypticthread.smsapp.provider"
+            android:name=".DataProvider"
+            android:exported="false"/>
     </application>
 
 </manifest>

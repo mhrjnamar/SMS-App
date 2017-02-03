@@ -35,4 +35,8 @@ class UserSessionManager {
 
     }
 
+    String getChildIds(){
+        return pref.getString(StaticVariables.KEY_CHILD_IDS,null);
+    }
+
 }

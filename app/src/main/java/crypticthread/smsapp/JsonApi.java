@@ -1,6 +1,7 @@
 package crypticthread.smsapp;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -30,6 +31,7 @@ public class JsonApi extends AsyncTask<String,Void,String> {
     public JsonApi(String method,JsonApiListener listener) {
         this.method = method;
         this.listener = listener;
+        Log.i(TAG, "JsonApi: method"+method);
     }
 
     @Override
@@ -77,6 +79,7 @@ public class JsonApi extends AsyncTask<String,Void,String> {
             return;
         }
 
+        Log.i(TAG, "onPostExecute:s "+s);
         JSONArray data = null;
         try {
             JSONObject object = new JSONObject(s);
