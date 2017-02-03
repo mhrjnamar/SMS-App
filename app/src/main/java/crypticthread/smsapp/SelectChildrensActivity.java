@@ -9,5 +9,7 @@ public class SelectChildrensActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_childrens);
+        overridePendingTransition(R.anim.activity_in,R.anim.activity_out);
+
     }
 }

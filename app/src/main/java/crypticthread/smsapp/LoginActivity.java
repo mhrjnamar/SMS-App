@@ -6,6 +6,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -19,10 +20,19 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "LoginActivity";
-
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            startActivity(new Intent(LoginActivity.this, SelectChildrensActivity.class));
+        }
+    };
     private TextInputEditText et_emailID;
     private TextInputEditText et_password;
     private Button btn_login;
@@ -31,17 +41,42 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private ImageView img_logo;
     private JsonApi loginAsync;
     private RelativeLayout loading_view;
+    private LoadingFrag frag;
+    private UserSessionManager manager;
     private JsonApi.JsonApiListener listener = new JsonApi.JsonApiListener() {
         @Override
         public void onSuccess(String method, String response) {
+
+            try {
+                JSONObject object = new JSONObject(response);
+                JSONArray data = object.getJSONArray("data");
+                JSONObject datum = data.getJSONObject(0);
+                ParentsDetails details = new ParentsDetails(datum.getString("id"),
+                        datum.getString("first_name"),
+                        datum.getString("last_name"),
+                        datum.getString("username"),
+                        datum.getString("role"),
+                        datum.getString("email"),
+                        datum.getString("student_id"),
+                        datum.getString("photo"));
+                manager.setParentsDetails(details);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
             showLoading(false);
-            Log.i(TAG, "onSuccess:response "+response);
-            startActivity(new Intent(LoginActivity.this,SelectChildrensActivity.class));
+            Log.i(TAG, "onSuccess:response " + response);
+            frag.dismiss();
+            Handler h = new Handler();
+            h.postDelayed(runnable, 400);
+
+
         }
 
         @Override
         public void onError(String error) {
             showLoading(false);
+            frag.dismiss();
             showDialog(error);
 
         }
@@ -52,6 +87,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
         setTheme(R.style.LoginScreenTheme);
         setContentView(R.layout.activity_login);
+        overridePendingTransition(R.anim.activity_in, R.anim.activity_out);
 
         //initializing views
         et_emailID = (TextInputEditText) findViewById(R.id.et_emailId);
@@ -66,6 +102,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         et_emailID.setText("hitesh@gmail.com");
         et_password.setText("123");
+
+        manager = new UserSessionManager(LoginActivity.this);
 
         //for animation
         sv_login_holder.setVisibility(View.INVISIBLE);
@@ -86,15 +124,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
 
-    private void showLoading(Boolean isShow){
+    private void showLoading(Boolean isShow) {
 
-        loading_view.setVisibility(isShow?View.VISIBLE:View.INVISIBLE);
+        loading_view.setVisibility(isShow ? View.VISIBLE : View.INVISIBLE);
         et_emailID.clearFocus();
         et_password.clearFocus();
         et_emailID.setEnabled(!isShow);
         et_password.setEnabled(!isShow);
-        btn_login.setText(isShow?"Logging in...":"Login");
-        btn_forgot.setVisibility(!isShow?View.VISIBLE:View.GONE);
+        btn_login.setText(isShow ? "Logging in..." : "Login");
+        btn_forgot.setVisibility(!isShow ? View.VISIBLE : View.GONE);
         btn_login.setEnabled(!isShow);
         btn_forgot.setEnabled(!isShow);
 
@@ -145,17 +183,28 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onClick(View v) {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(v.getWindowToken(),0);
+        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
         if (v.equals(btn_login)) {
             if (getText(et_emailID).matches("[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+") && getText(et_emailID).length() > 0) {
+                frag = LoadingFrag.newInstance("Logging in please wait...");
+                frag.show(getSupportFragmentManager(), "Loading");
                 showLoading(true);
-                loginAsync = new JsonApi("http://www.crypticthread.com.np/smsapi/parents.php?code=ABCD_1124&email="+getText(et_emailID)+"&password="+getText(et_password),listener);
+                loginAsync = new JsonApi("http://www.crypticthread.com.np/smsapi/parents.php?code=ABCD_1124&email=" + getText(et_emailID) + "&password=" + getText(et_password), listener);
                 loginAsync.execute();
             } else if (getText(et_password).isEmpty()) {
                 showDialog("Password is empty");
             } else {
                 showDialog(" Email Id is invalid \n Please enter email in correct format\n Eg. rahul@gmail.com");
             }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (loginAsync != null) {
+            loginAsync.cancel(true);
+            loginAsync = null;
         }
     }
 }

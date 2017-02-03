@@ -7,6 +7,9 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -71,6 +74,20 @@ public class JsonApi extends AsyncTask<String,Void,String> {
 
         if (s==null){
             listener.onError("Could not connect to the Server. \nPlease Check your Internet Connection and try again.\n\nDetails:\n"+error);
+            return;
+        }
+
+        JSONArray data = null;
+        try {
+            JSONObject object = new JSONObject(s);
+            data = object.getJSONArray("data");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        assert data != null;
+        if (data==null) {
+            listener.onError("User doesn't Exist");
         }else {
             listener.onSuccess(method,s);
         }
