@@ -1,13 +1,17 @@
 package crypticthread.smsapp;
 
+import android.animation.ObjectAnimator;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -21,11 +25,12 @@ public class SelectChildrensActivity extends AppCompatActivity {
 
     private RecyclerView studentList;
     private StudentListAdapter adapter;
-
+    private int id_count = 0;
     private UserSessionManager manager;
     private JsonApi studentInfoAsync;
     private ArrayList<StudentDetails> student;
     private StudentDetails details;
+    private LoadingFrag frag;
     private JsonApi.JsonApiListener listener = new JsonApi.JsonApiListener() {
         @Override
         public void onSuccess(String method, String response) {
@@ -50,11 +55,18 @@ public class SelectChildrensActivity extends AppCompatActivity {
             getContentResolver().insert(DataProvider.STUDENT_URI, cv);
             student.add(details);
             studentInfoAsync = null;
-            adapter.updateInfo(student);
+            Log.i(TAG, "onSuccess:Ssize "+student.size());
+            Log.i(TAG, "onSuccess:idCount "+id_count);
+            if (student.size()==id_count){
+                frag.dismiss();
+                adapter.updateInfo(student);
+            }
+
         }
 
         @Override
         public void onError(String error) {
+            frag.dismiss();
             studentInfoAsync = null;
 
         }
@@ -64,7 +76,10 @@ public class SelectChildrensActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_childrens);
-        overridePendingTransition(R.anim.activity_in, R.anim.activity_out);
+        overridePendingTransition(0, R.anim.activity_out);
+
+        frag = LoadingFrag.newInstance("Getting Student infos....");
+        frag.show(getSupportFragmentManager(),"StudentInfos");
 
         studentList = (RecyclerView) findViewById(R.id.childrensList);
         studentList.setLayoutManager(new LinearLayoutManager(SelectChildrensActivity.this));
@@ -75,14 +90,17 @@ public class SelectChildrensActivity extends AppCompatActivity {
         manager = new UserSessionManager(SelectChildrensActivity.this);
 
         String childId = manager.getChildIds();
+        Log.i(TAG, "onCreate: "+childId);
         if (childId.contains(",")) {
             String cIds[] = manager.getChildIds().split(",");
+            id_count = cIds.length;
             for (String cId : cIds) {
                 studentInfoAsync = new JsonApi("http://www.crypticthread.com.np/smsapi/students.php?code=ABCD_1124&id=" + cId
                         , listener);
                 studentInfoAsync.execute();
             }
         } else {
+            id_count= 1;
             if (studentInfoAsync == null) {
                 studentInfoAsync = new JsonApi("http://www.crypticthread.com.np/smsapi/students.php?code=ABCD_1124&id=" + childId
                         , listener);
@@ -99,6 +117,11 @@ public class SelectChildrensActivity extends AppCompatActivity {
             studentInfoAsync.cancel(true);
             studentInfoAsync = null;
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+
     }
 
     class StudentListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -122,12 +145,27 @@ public class SelectChildrensActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             Holder h = (Holder) holder;
-            StudentDetails detail = details.get(position);
+            final StudentDetails detail;
+            detail = details.get(position);
             h.name.setText(detail.getFirstName() + " " + detail.getLastName());
             h.class_no.setText(detail.getGrade());
             h.roll_no.setText(detail.getRollNo());
+            ObjectAnimator anim = ObjectAnimator.ofFloat(h.itemView,"translationY",800,0);
+            anim.setDuration(200);
+            anim.setInterpolator(new DecelerateInterpolator());
+            anim.start();
+            h.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
+                    Intent i = new Intent(SelectChildrensActivity.this,MenuActivity.class);
+                    i.putExtra(StaticVariables.KEY_STUDENT_ID,detail.getStudent_id());
+                    startActivity(i);
+                }
+            });
 
         }
+
 
         @Override
         public int getItemCount() {

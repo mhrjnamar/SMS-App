@@ -8,7 +8,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -24,7 +23,7 @@ import java.io.InputStreamReader;
 public class JsonApi extends AsyncTask<String,Void,String> {
     private static final String TAG = "JsonApi";
     private String result = null;
-    private String method;
+    private final String method;
     private JsonApiListener listener;
     private String error = null;
 
@@ -49,6 +48,9 @@ public class JsonApi extends AsyncTask<String,Void,String> {
         }
         HttpClient client = new DefaultHttpClient();
         HttpConnectionParams.setConnectionTimeout(client.getParams(),10000);
+        synchronized (method){
+
+        }
         HttpPost post = new HttpPost(method);
         try {
             HttpResponse response = client.execute(post);
@@ -80,19 +82,25 @@ public class JsonApi extends AsyncTask<String,Void,String> {
         }
 
         Log.i(TAG, "onPostExecute:s "+s);
-        JSONArray data = null;
+        String msg = "";
+        String status = "";
         try {
             JSONObject object = new JSONObject(s);
-            data = object.getJSONArray("data");
+            status = object.getString("status");
+            msg = object.getString("msg");
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        assert data != null;
-        if (data==null) {
-            listener.onError("User doesn't Exist");
+        if (status.equals("0")) {
+//            assert data != null;
+//            if (data == null) {
+//                listener.onError("No Data");
+//            } else {
+                listener.onSuccess(method, s);
+//            }
         }else {
-            listener.onSuccess(method,s);
+            listener.onError(msg);
         }
     }
 

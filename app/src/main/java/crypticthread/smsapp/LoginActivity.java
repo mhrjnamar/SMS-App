@@ -30,6 +30,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     Runnable runnable = new Runnable() {
         @Override
         public void run() {
+            finish();
             startActivity(new Intent(LoginActivity.this, SelectChildrensActivity.class));
         }
     };
@@ -65,9 +66,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 e.printStackTrace();
             }
 
-            showLoading(false);
             Log.i(TAG, "onSuccess:response " + response);
-            frag.dismiss();
+            //frag.dismiss();
             Handler h = new Handler();
             h.postDelayed(runnable, 400);
 
@@ -76,6 +76,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         @Override
         public void onError(String error) {
+            loginAsync = null;
             showLoading(false);
             frag.dismiss();
             showDialog(error);
@@ -88,7 +89,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
         setTheme(R.style.LoginScreenTheme);
         setContentView(R.layout.activity_login);
-        overridePendingTransition(R.anim.activity_in, R.anim.activity_out);
+        overridePendingTransition(R.anim.activity_in,0);
 
         //initializing views
         et_emailID = (TextInputEditText) findViewById(R.id.et_emailId);
@@ -101,7 +102,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         et_emailID.clearFocus();
         et_password.clearFocus();
 
-        et_emailID.setText("hitesh@gmail.com");
+        et_emailID.setText("sanjeev.budha@deerwalk.edu.np");
         et_password.setText("123");
 
         manager = new UserSessionManager(LoginActivity.this);
@@ -149,6 +150,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         ObjectAnimator logo_translateY = ObjectAnimator.ofFloat(logo, "translationY", 500f, 0);
         logo_translateY.setInterpolator(new OvershootInterpolator());
+        logo_translateY.setDuration(1000);
         logo_translateY.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -174,7 +176,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         ObjectAnimator sv_translateY = ObjectAnimator.ofFloat(sv_login_holder, "translationY", (float) height, 0f);
 
         AnimatorSet set = new AnimatorSet();
-        set.setDuration(1000);
+        set.setDuration(600);
         set.playSequentially(logo_translateY, sv_translateY);
         set.setStartDelay(1000);
         set.start();
@@ -186,7 +188,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
         if (v.equals(btn_login)) {
-            if (getText(et_emailID).matches("[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+") && getText(et_emailID).length() > 0) {
+           // if (getText(et_emailID).matches("[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z].+[a-z]+") && getText(et_emailID).length() > 0) {
+            if (android.util.Patterns.EMAIL_ADDRESS.matcher(getText(et_emailID)).matches()&& getText(et_emailID).length() > 0) {
                 frag = LoadingFrag.newInstance("Logging in please wait...");
                 frag.show(getSupportFragmentManager(), "Loading");
                 showLoading(true);

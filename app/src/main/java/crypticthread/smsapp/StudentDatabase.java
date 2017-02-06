@@ -48,7 +48,7 @@ public class StudentDatabase extends SQLiteOpenHelper {
         return getWritableDatabase().delete(STUDENT_TABLE,s,null);
     }
 
-    public Cursor loadStudentData(String s){
-        return getReadableDatabase().rawQuery("SELECT * FROM "+STUDENT_TABLE+" WHERE "+s,null);
+    public Cursor loadStudentData(String id){
+        return getReadableDatabase().rawQuery("SELECT * FROM "+STUDENT_TABLE+" WHERE "+id,null);
     }
 }

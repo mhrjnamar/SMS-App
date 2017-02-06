@@ -10,4 +10,12 @@
     <string name="roll_no">Roll No</string>
     <string name="class_no">Class</string>
     <string name="select_student">Select Student</string>
+    <string name="logout">Logout</string>
+    <string name="close">Close</string>
+    <string name="open">Open</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="contact_us">Contact Us</string>
+    <string name="powerd_by_crypticthread_pvt_ltd">Powerd By CrypticThread Pvt.Ltd</string>
 </resources>

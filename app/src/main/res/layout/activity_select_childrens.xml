@@ -4,7 +4,7 @@
     android:id="@+id/activity_select_childrens"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/student_listbg"
+    android:background="@drawable/background"
     android:orientation="vertical"
     tools:context="crypticthread.smsapp.SelectChildrensActivity">
 
@@ -17,6 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/select_student"
+            android:gravity="center|start"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@android:color/white"/>
     </android.support.v7.widget.Toolbar>
@@ -25,6 +26,6 @@
         android:id="@+id/childrensList"
         android:layout_width="match_parent"
         android:padding="@dimen/activity_horizontal_margin"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent" />
 
 </LinearLayout>

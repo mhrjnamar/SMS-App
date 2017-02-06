@@ -7,6 +7,8 @@ package crypticthread.smsapp;
 public class StaticVariables {
     public static final String KEY_LOADING_MSG = "loading_msg";
 
+    public static final String KEY_STUDENT_ID = "key_student_id";
+
     public static final String KEY_PARENTS_ID = "parent_id";
     public static final String KEY_FIRST_NAME = "first_name";
     public static final String KEY_LAST_NAME = "last_name";
@@ -15,6 +17,7 @@ public class StaticVariables {
     public static final String KEY_EMAIL = "email";
     public static final String KEY_CHILD_IDS = "child_ids";
     public static final String KEY_PHOTO = "photo";
+
 
 
 }
